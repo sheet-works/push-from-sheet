@@ -196,6 +196,7 @@ console.log('recent answer while waiting:', JSON.stringify(web({ action: 'recent
 { const d = sheets.Devices.grid, h = d.findIndex(r => r.indexOf('Let in') >= 0); devRow(ID_D)[d[h].indexOf('Let in')] = true; }   // the owner ticks Let in
 safe('runOnChange'); console.log('recent answer once let in:', JSON.stringify(web({ action: 'recent', id: ID_D })));
 console.log('===== 12. a row typed by hand: marked Sending soon, the rest is typed during the wait, sent once with all of it');
+setWait('30 seconds');   // the owner picks a wait after Set up (since 19 Nov Set up makes it Off for AppSheet Yes)
 G.watch = vm.runInContext('ENGINE.SENDING', ctx);
 sheets.Bookings.grid.push(['Typed slowly', '', '', '']);
 let seen = [], typed = false; G.slept = 0; fetched.length = 0;
@@ -243,3 +244,8 @@ G.afterRead = null; G.onFetch = null; safe('pfsSetUp'); G.traceReads = null;
 sheets.Setup.grid.find(r => r[1] === 'Firebase project address')[2] = '';
 G.dialog = null; G.afterRead = { n: 3, f: () => { sheets.Setup.grid.find(r => r[1] === 'Firebase project address')[2] = 'https://console.firebase.google.com/project/typed-late-1a2b/overview'; } };
 safe('pfsSetUp'); console.log('said:', JSON.stringify(logs[logs.length - 1])); console.log('project after the empty run:', JSON.stringify(val('Firebase project address')));
+console.log('===== 22. AppSheet Yes with Wait still at 30 seconds (onEdit missed it in a new copy): Set up makes it Off, and does not call it a change typed during the run');
+sheets.Setup.grid.find(r => r[1] === 'Firebase project address')[2] = 'https://console.firebase.google.com/project/typed-late-1a2b/overview';
+G.afterRead = null; G.onFetch = null;
+sheets.Setup.grid.find(r => r[1] === 'Making an AppSheet app?')[2] = 'Yes'; setWait('30 seconds'); logs.length = 0;
+safe('pfsSetUp'); console.log('wait after Set up:', JSON.stringify(val('Wait before sending')), '| said changed:', /You changed/.test(logs.join(' ')));

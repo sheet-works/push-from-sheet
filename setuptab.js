@@ -254,7 +254,20 @@ var SETUPTAB = (function (SETUP, STEPS) {
     return wait === other.toLowerCase() ? { row: at + 1, col: 3, value: want } : null;
   }
 
-  return { build: build, forCopy: forCopy, typedDuring: typedDuring, afterEdit: afterEdit, isOurs: isOurs, followTab: followTab, ownerTabs: ownerTabsOf, TAB_NAME: 'Setup' };
+  // Set up applies the onEdit rule for Yes too (19 Nov: in a brand-new copy, edits typed during the first-open redraw
+  // lost their onEdit, so Yes left Wait at 30 seconds). Only Yes -> Off: an Off the owner chose with No is theirs.
+  // Gives a copy of the rows; the rows given are not changed.
+  function waitFollows(rows) {
+    var out = rows.map(function (r) { return (r || []).slice(); }), i;
+    for (i = 0; i < out.length; i++) {
+      if (String(out[i][1] || '').trim() !== SETUP.APPSHEET_LABEL || String(out[i][2] || '').trim().toLowerCase() !== 'yes') continue;
+      var change = afterEdit(out, i + 1, 3);
+      if (change) out[change.row - 1][change.col - 1] = change.value;
+    }
+    return out;
+  }
+
+  return { build: build, forCopy: forCopy, typedDuring: typedDuring, afterEdit: afterEdit, waitFollows: waitFollows, isOurs: isOurs, followTab: followTab, ownerTabs: ownerTabsOf, TAB_NAME: 'Setup' };
 })(typeof SETUP !== 'undefined' ? SETUP : require(process.env.SETUP || './setup.js'),
    typeof STEPS !== 'undefined' ? STEPS : require('./steps.js'));
 

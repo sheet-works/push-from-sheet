@@ -643,3 +643,19 @@ test('an old comma list spread into the third message row is checked name by nam
 test('the footer points straight at the repo, where the README is', () => {
   assert.ok(build().rows.some(r => /github\.com\/sheet-works\/push-from-sheet/.test(r[1])));
 });
+
+// 19 Nov (real AppSheet dev test): Yes typed in a brand-new copy while its first-open redraw ran - only one onEdit of
+// three edits ran, so Wait stayed 30 seconds. Set up now applies the same rule as onEdit before it reads the settings.
+test('waitFollows: AppSheet Yes with Wait still at 30 seconds becomes Off, at Set up', () => {
+  const rows = [[], ['', SETUP.APPSHEET_LABEL, 'Yes'], ['', SETUP.WAIT_LABEL, '30 seconds']];
+  const out = SETUPTAB.waitFollows(rows);
+  assert.equal(out[2][2], 'Off');
+  assert.equal(rows[2][2], '30 seconds', 'the rows given are not changed');
+});
+test('waitFollows: a wait the owner picked (1 minute) is left; No leaves 30 seconds; no AppSheet row leaves it', () => {
+  assert.equal(SETUPTAB.waitFollows([['', SETUP.APPSHEET_LABEL, 'Yes'], ['', SETUP.WAIT_LABEL, '1 minute']])[1][2], '1 minute');
+  assert.equal(SETUPTAB.waitFollows([['', SETUP.APPSHEET_LABEL, 'No'], ['', SETUP.WAIT_LABEL, '30 seconds']])[1][2], '30 seconds');
+  assert.equal(SETUPTAB.waitFollows([['', SETUP.WAIT_LABEL, '30 seconds']])[0][2], '30 seconds');
+  assert.equal(SETUPTAB.waitFollows([['', SETUP.APPSHEET_LABEL, 'No'], ['', SETUP.WAIT_LABEL, 'Off']])[1][2], 'Off', 'an Off the owner chose with No stays Off');
+  assert.deepEqual(SETUPTAB.waitFollows([]), []);
+});

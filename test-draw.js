@@ -132,3 +132,55 @@ test('row heights: every row gets the height of its kind, set in runs (one call 
 test('dropdowns: the sheet is asked for its tabs once, not once per dropdown', () => {
   assert.ok(drawn().parentReads.length <= 1, 'parent reads: ' + drawn().parentReads.length);
 });
+
+// 19 Nov (real AppSheet dev test): a phone whose short name was 78E6 showed as 7.80E+07 on Devices - Sheets read the
+// name as a number. The Name, Email, Device and ID columns must be plain text before the rows are written.
+function devicesDrawn(rows) {
+  const PHONETAB = require(path.join(here, 'phonetab.js'));
+  const formats = [], written = [];
+  const chain = (extra) => new Proxy(function () {}, {
+    get: (t, p) => (p === Symbol.toPrimitive ? () => 0 : p in extra ? extra[p] : () => chain(extra)), apply: () => chain(extra) });
+  const rangeOf = (r, c, nr, nc) => { const g = chain({
+    setNumberFormat: (f) => { formats.push({ r, c, nr: nr || 1, nc: nc || 1, f, at: written.length }); return g; },
+    setValues: (v) => { written.push({ r, c, v }); return g; } }); return g; };
+  const sheet = chain({ getRange: rangeOf, getMaxRows: () => 40, getMaxColumns: () => 10 });
+  const ctx = { SETUP, PHONETAB, Object, Array, String, Math, JSON, Date, Logger: { log: () => {} },
+    SpreadsheetApp: { newConditionalFormatRule: () => chain({}), newDataValidation: () => chain({}), newTextStyle: () => chain({}),
+      newRichTextValue: () => chain({}), flush: () => {}, BorderStyle: { SOLID: 'SOLID', SOLID_THICK: 'SOLID_THICK' }, ProtectionType: { RANGE: 'RANGE' } } };
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(path.join(here, 'draw-setup-apps-script.js'), 'utf8'), ctx);
+  const frame = PHONETAB.frame('Smith Cutting', { on: 1, waiting: 0, gone: 0 });
+  ctx.phonesDraw_(sheet, frame, rows, '#1565C0');
+  return { formats, written, frame };
+}
+
+test('Devices: Name, Email, Device and ID columns are plain text before the rows go in, so a name like 78E6 stays 78E6', () => {
+  const row = ['78E6', '', 'iPhone, Home Screen', false, '19 Nov 12:31 am', '19 Nov 12:31 am', '', 'Waiting', '78e6aa01'];
+  const d = devicesDrawn([row]);
+  const first = d.frame.firstDataRow, col0 = d.frame.firstCol;   // Name is the first of the 9 cells
+  const rowsAt = d.written.findIndex(w => w.r === first);
+  assert.ok(rowsAt >= 0, 'device rows written');
+  const textAt = (c) => d.formats.some(f => f.f === '@' && c >= f.c && c < f.c + f.nc && first >= f.r && first < f.r + f.nr && f.at <= rowsAt);
+  [0, 1, 2, 8].forEach(i => assert.ok(textAt(col0 + i), 'column ' + (col0 + i) + ' is text before the rows are written'));
+  assert.ok(!textAt(col0 + 3), 'the Let in tick column stays a tick, not text');
+});
+
+test('Devices refill (no redraw): Name, Email, Device and ID are made text before the rows go in - covers tabs drawn by an older build', () => {
+  const PHONETAB = require(path.join(here, 'phonetab.js'));
+  const formats = [], written = [];
+  const chain = (extra) => new Proxy(function () {}, {
+    get: (t, p) => (p === Symbol.toPrimitive ? () => 0 : p in extra ? extra[p] : () => chain(extra)), apply: () => chain(extra) });
+  const rangeOf = (r, c, nr, nc) => { const g = chain({
+    setNumberFormat: (f) => { formats.push({ r, c, nr: nr || 1, nc: nc || 1, f, at: written.length }); return g; },
+    setValues: (v) => { written.push({ r, c, v }); return g; } }); return g; };
+  const sheet = chain({ getRange: rangeOf, getMaxRows: () => 30 });
+  const ctx = { SETUP, PHONETAB, Object, Array, String, Math, JSON, Date, Logger: { log: () => {} }, SpreadsheetApp: { flush: () => {} } };
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(path.join(here, 'draw-setup-apps-script.js'), 'utf8'), ctx);
+  const frame = PHONETAB.frame('Smith Cutting', { on: 1, waiting: 0, gone: 0 });
+  ctx.phonesFill_(sheet, frame, [['78E6', '', 'iPhone', false, '', '', '', 'Waiting', '78e6aa01']]);
+  const first = frame.firstDataRow, rowsAt = written.findIndex(w => w.r === first);
+  const textAt = (c) => formats.some(f => f.f === '@' && c >= f.c && c < f.c + f.nc && first >= f.r && first < f.r + f.nr && f.at <= rowsAt);
+  [2, 3, 4, 10].forEach(c => assert.ok(textAt(c), 'column ' + c + ' is text before the rows are written'));
+  assert.ok(!textAt(5), 'Let in stays a tick');
+});

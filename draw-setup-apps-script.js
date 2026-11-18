@@ -189,6 +189,9 @@ function phonesDraw_(sheet, frame, rows, colour) {
   sheet.getRange(1, 1, last, W).setBackground(LOOKB.page).setFontFamily(LOOKB.font).setFontSize(10).setFontColor(LOOKB.ink).setVerticalAlignment('middle');
   // Dates are written as text, so the sheet shows them as written ('17 Nov 7:37 pm'), not as 24-hour sheet dates.
   sheet.getRange(first, 6, last - first + 1, 3).setNumberFormat('@');
+  // Name, Email, Device and ID are text too: a short name like 78E6 was read as a number and showed 7.80E+07 (19 Nov).
+  sheet.getRange(first, 2, last - first + 1, 3).setNumberFormat('@');
+  sheet.getRange(first, 10, last - first + 1, 1).setNumberFormat('@');
 
   sheet.getRange(1, 1, frame.rows.length, W).setValues(frame.rows);
   if (n) sheet.getRange(first, frame.firstCol, n, 9).setValues(rows);
@@ -234,6 +237,8 @@ function phonesFill_(sheet, frame, rows) {
   var area = sheet.getRange(first, frame.firstCol, size, 9);
   area.clearContent();
   sheet.getRange(first, 5, size, 1).removeCheckboxes();
+  sheet.getRange(first, 2, size, 3).setNumberFormat('@');    // names like 78E6 stay text (19 Nov)
+  sheet.getRange(first, 10, size, 1).setNumberFormat('@');
   if (n) {
     sheet.getRange(first, frame.firstCol, n, 9).setValues(rows);
     sheet.getRange(first, 5, n, 1).insertCheckboxes();

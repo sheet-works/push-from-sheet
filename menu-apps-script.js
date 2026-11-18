@@ -109,12 +109,13 @@ function pfsSetUp() {
     return name;
   });
   if (!tab) tab = book.insertSheet(SETUPTAB.TAB_NAME, 0);
+  current = SETUPTAB.waitFollows(current);   // AppSheet Yes with Wait still at 30 seconds -> Off (19 Nov)
   var shown = {}, io = pfsHands_(book, shown), info = { name: book.getName(), tabs: tabs, headers: headers, owner: pfsOwner_(book) };
   var built = SETUPTAB.build(info, current, STEPS.facts(io)), read = SETUP.read(built.rows), s = read.settings;
   var problems = read.problems.concat(built.stale || []);   // a picked column that is gone stops it here, not at step 6
   if (problems.length) {   // not ready for the Firebase steps yet: draw, and say what is still to fill in
     // Anything typed since the tab was read is kept (cold test 2: a project typed while Set up ran was drawn over).
-    var now = tab.getDataRange().getDisplayValues();
+    var now = SETUPTAB.waitFollows(tab.getDataRange().getDisplayValues());
     if (SETUPTAB.typedDuring(current, now).length) {
       current = now; built = SETUPTAB.build(info, current, STEPS.facts(io)); read = SETUP.read(built.rows); s = read.settings;
       problems = read.problems.concat(built.stale || []);
@@ -136,7 +137,7 @@ function pfsSetUp() {
   var facts = STEPS.run({ project: s.firebaseProject, appName: s.appName, colour: s.colour, backupMinutes: s.backupMinutes,
     version: MENU.VERSION + (typeof PFS_BUILD === 'undefined' ? '' : '+' + PFS_BUILD), files: PFS_PAGE_FILES }, io);   // any new paste is published again
   // The steps take a minute: draw from the tab as it is NOW, so anything typed meanwhile is kept, and say so.
-  var now2 = tab.getDataRange().getDisplayValues(), late = SETUPTAB.typedDuring(current, now2);
+  var now2 = SETUPTAB.waitFollows(tab.getDataRange().getDisplayValues()), late = SETUPTAB.typedDuring(current, now2);
   lap('steps');
   built = SETUPTAB.build(info, now2, facts);
   setupDraw_(tab, built, s.colour);

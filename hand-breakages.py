@@ -22,6 +22,8 @@ B = [
  ('typing during the steps drawn over', "  built = SETUPTAB.build(info, now2, facts);", "  built = SETUPTAB.build(info, current, facts);", 'app name after the run'),
  ('typing during the steps not mentioned', "  if (late.length) { pfsSay_(", "  if (false) { pfsSay_(", 'said changed'),
  ('share box not opened at the end', "  if (STEPS.finished(facts)) pfsShowShare_(", "  if (false) pfsShowShare_(", 'share box after Set up'),
+ ('Set up ignores AppSheet Yes with Wait at 30 seconds', "  current = SETUPTAB.waitFollows(current);", "", 'wait after Set up'),
+ ('after the steps the raw tab is read, so Off looks typed', "var now2 = SETUPTAB.waitFollows(tab.getDataRange().getDisplayValues())", "var now2 = tab.getDataRange().getDisplayValues()", 'wait after Set up'),
  ('share box without All done', "MENU.shareHtml(page, png, s.appName || MENU.TITLE, s.colour, lead)", "MENU.shareHtml(page, png, s.appName || MENU.TITLE, s.colour)", 'All done on top'),
 ]
 def run(text):

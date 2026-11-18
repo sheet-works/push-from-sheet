@@ -1726,7 +1726,20 @@ var SETUPTAB = (function (SETUP, STEPS) {
     return wait === other.toLowerCase() ? { row: at + 1, col: 3, value: want } : null;
   }
 
-  return { build: build, forCopy: forCopy, typedDuring: typedDuring, afterEdit: afterEdit, isOurs: isOurs, followTab: followTab, ownerTabs: ownerTabsOf, TAB_NAME: 'Setup' };
+  // Set up applies the onEdit rule for Yes too (19 Nov: in a brand-new copy, edits typed during the first-open redraw
+  // lost their onEdit, so Yes left Wait at 30 seconds). Only Yes -> Off: an Off the owner chose with No is theirs.
+  // Gives a copy of the rows; the rows given are not changed.
+  function waitFollows(rows) {
+    var out = rows.map(function (r) { return (r || []).slice(); }), i;
+    for (i = 0; i < out.length; i++) {
+      if (String(out[i][1] || '').trim() !== SETUP.APPSHEET_LABEL || String(out[i][2] || '').trim().toLowerCase() !== 'yes') continue;
+      var change = afterEdit(out, i + 1, 3);
+      if (change) out[change.row - 1][change.col - 1] = change.value;
+    }
+    return out;
+  }
+
+  return { build: build, forCopy: forCopy, typedDuring: typedDuring, afterEdit: afterEdit, waitFollows: waitFollows, isOurs: isOurs, followTab: followTab, ownerTabs: ownerTabsOf, TAB_NAME: 'Setup' };
 })(typeof SETUP !== 'undefined' ? SETUP : require(process.env.SETUP || './setup.js'),
    typeof STEPS !== 'undefined' ? STEPS : require('./steps.js'));
 
@@ -2436,6 +2449,9 @@ function phonesDraw_(sheet, frame, rows, colour) {
   sheet.getRange(1, 1, last, W).setBackground(LOOKB.page).setFontFamily(LOOKB.font).setFontSize(10).setFontColor(LOOKB.ink).setVerticalAlignment('middle');
   // Dates are written as text, so the sheet shows them as written ('17 Nov 7:37 pm'), not as 24-hour sheet dates.
   sheet.getRange(first, 6, last - first + 1, 3).setNumberFormat('@');
+  // Name, Email, Device and ID are text too: a short name like 78E6 was read as a number and showed 7.80E+07 (19 Nov).
+  sheet.getRange(first, 2, last - first + 1, 3).setNumberFormat('@');
+  sheet.getRange(first, 10, last - first + 1, 1).setNumberFormat('@');
 
   sheet.getRange(1, 1, frame.rows.length, W).setValues(frame.rows);
   if (n) sheet.getRange(first, frame.firstCol, n, 9).setValues(rows);
@@ -2481,6 +2497,8 @@ function phonesFill_(sheet, frame, rows) {
   var area = sheet.getRange(first, frame.firstCol, size, 9);
   area.clearContent();
   sheet.getRange(first, 5, size, 1).removeCheckboxes();
+  sheet.getRange(first, 2, size, 3).setNumberFormat('@');    // names like 78E6 stay text (19 Nov)
+  sheet.getRange(first, 10, size, 1).setNumberFormat('@');
   if (n) {
     sheet.getRange(first, frame.firstCol, n, 9).setValues(rows);
     sheet.getRange(first, 5, n, 1).insertCheckboxes();
@@ -2650,12 +2668,13 @@ function pfsSetUp() {
     return name;
   });
   if (!tab) tab = book.insertSheet(SETUPTAB.TAB_NAME, 0);
+  current = SETUPTAB.waitFollows(current);   // AppSheet Yes with Wait still at 30 seconds -> Off (19 Nov)
   var shown = {}, io = pfsHands_(book, shown), info = { name: book.getName(), tabs: tabs, headers: headers, owner: pfsOwner_(book) };
   var built = SETUPTAB.build(info, current, STEPS.facts(io)), read = SETUP.read(built.rows), s = read.settings;
   var problems = read.problems.concat(built.stale || []);   // a picked column that is gone stops it here, not at step 6
   if (problems.length) {   // not ready for the Firebase steps yet: draw, and say what is still to fill in
     // Anything typed since the tab was read is kept (cold test 2: a project typed while Set up ran was drawn over).
-    var now = tab.getDataRange().getDisplayValues();
+    var now = SETUPTAB.waitFollows(tab.getDataRange().getDisplayValues());
     if (SETUPTAB.typedDuring(current, now).length) {
       current = now; built = SETUPTAB.build(info, current, STEPS.facts(io)); read = SETUP.read(built.rows); s = read.settings;
       problems = read.problems.concat(built.stale || []);
@@ -2677,7 +2696,7 @@ function pfsSetUp() {
   var facts = STEPS.run({ project: s.firebaseProject, appName: s.appName, colour: s.colour, backupMinutes: s.backupMinutes,
     version: MENU.VERSION + (typeof PFS_BUILD === 'undefined' ? '' : '+' + PFS_BUILD), files: PFS_PAGE_FILES }, io);   // any new paste is published again
   // The steps take a minute: draw from the tab as it is NOW, so anything typed meanwhile is kept, and say so.
-  var now2 = tab.getDataRange().getDisplayValues(), late = SETUPTAB.typedDuring(current, now2);
+  var now2 = SETUPTAB.waitFollows(tab.getDataRange().getDisplayValues()), late = SETUPTAB.typedDuring(current, now2);
   lap('steps');
   built = SETUPTAB.build(info, now2, facts);
   setupDraw_(tab, built, s.colour);
@@ -2770,4 +2789,4 @@ var PFS_ENV = {
 };
 
 // Build stamp (made by build.py from everything above).
-var PFS_BUILD = '4123774045';
+var PFS_BUILD = '2498962531';
