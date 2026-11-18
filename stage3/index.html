@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notifications</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" id="home-title" content="Notifications">
+<meta name="theme-color" id="theme" content="#ffffff">
+<style>
+  /* The look picked 17 Nov: 'Plain, in the owner's colours' (design canvas, Plain-* artboards). */
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  #page { --accent: #1565C0; max-width: 480px; min-height: 100vh; margin: 0 auto; display: flex; flex-direction: column; }
+  .screen { display: none; flex-direction: column; flex-grow: 1; padding: 56px 24px 32px; }
+  .screen[style*="block"] { display: flex !important; }
+  .tile { width: 76px; height: 76px; border-radius: 18px; background: var(--accent); overflow: hidden; flex-shrink: 0; }
+  .tile img { width: 100%; height: 100%; display: block; }
+  .small .tile { width: 40px; height: 40px; border-radius: 10px; }
+  .head { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; }
+  h1 { margin: 24px 0 0; font-size: 31px; line-height: 1.15; font-weight: 700; letter-spacing: -0.4px; }
+  h2 { margin: 28px 0 8px; font-size: 19px; font-weight: 700; }
+  p { margin: 16px 0 0; font-size: 18px; line-height: 1.45; }
+  .lead { color: #444; }
+  .grow { flex-grow: 1; min-height: 32px; }
+  .big { width: 100%; min-height: 56px; border: none; border-radius: 14px; background: var(--accent); color: #fff; font: inherit; font-size: 18px; font-weight: 600; cursor: pointer; }
+  .note { margin-top: 14px; font-size: 15px; line-height: 1.4; color: #555; text-align: center; }
+  #status { margin-top: 14px; font-size: 16px; line-height: 1.4; color: #000; text-align: center; font-weight: 600; }
+  #status:empty { display: none; }
+  .link { min-height: 44px; padding: 0 12px; border: none; background: none; font: inherit; font-size: 17px; color: #444; text-decoration: underline; cursor: pointer; align-self: center; }
+  button:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+  ol { margin: 24px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 18px; }
+  ol li { display: flex; gap: 14px; align-items: flex-start; font-size: 18px; line-height: 1.4; }
+  ol li .n { width: 32px; height: 32px; flex-shrink: 0; border-radius: 16px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; }
+  ol li span:last-child { padding-top: 3px; }
+  .row { display: flex; gap: 12px; padding: 14px 0; border-top: 1px solid #DADADA; }
+  .row .t { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0; }
+  .row b { font-size: 17px; font-weight: 600; }
+  .row .m { font-size: 16px; color: #444; overflow-wrap: anywhere; }
+  .row .w { font-size: 15px; color: #555; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .empty { padding: 14px 0; border-top: 1px solid #DADADA; color: #555; font-size: 16px; }
+  details { margin-top: 24px; font-size: 13px; color: #777; }
+  details summary { cursor: pointer; }
+  details p { font-size: 13px; color: #777; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div id="page">
+
+  <!-- 1. Before: turn on -->
+  <section class="screen" id="scr-before">
+    <div class="tile"><img src="icon-192.png" alt=""></div>
+    <h1 id="title-before">Get notifications</h1>
+    <p class="lead" id="lead-before"></p>
+    <div class="grow"></div>
+    <button type="button" class="big" id="on">Turn on notifications</button>
+    <div id="status"></div>
+    <p class="note" id="note-before">You'll be asked to allow them. No account or email needed.</p>
+  </section>
+
+  <!-- 2. iPhone in Safari: add to the Home Screen first -->
+  <section class="screen" id="scr-iphone">
+    <div class="head small"><div class="tile"><img src="icon-192.png" alt=""></div><span class="appname"></span></div>
+    <h1 id="title-iphone">First, add this to your Home Screen</h1>
+    <p class="lead">iPhones only allow notifications from apps on the Home Screen.</p>
+    <ol>
+      <li><span class="n">1</span><span>Tap the Share button <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/></svg>. It is at the bottom of Safari, or behind the three-lines button beside the address.</span></li>
+      <li><span class="n">2</span><span>Choose <b>Add to Home Screen</b>, then <b>Add</b></span></li>
+      <li><span class="n">3</span><span id="step3">Open it from your Home Screen and turn on notifications there</span></li>
+    </ol>
+  </section>
+
+  <!-- 3. On -->
+  <section class="screen" id="scr-on">
+    <div class="head small"><div class="tile"><img src="icon-192.png" alt=""></div><span class="appname" id="appname"></span></div>
+    <svg id="tick-on" role="img" aria-label="On" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-top:36px;color:var(--accent)"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>
+    <h1 id="title-on" style="margin-top:8px">Notifications are on</h1>
+    <p class="lead" id="devname" style="margin-top:8px"></p>
+    <h2>Recent</h2>
+    <div id="recent"></div>
+    <div class="grow"></div>
+    <button type="button" class="link" id="off">Turn off notifications</button>
+  </section>
+
+  <!-- 4. Blocked -->
+  <section class="screen" id="scr-blocked">
+    <div class="head small"><div class="tile"><img src="icon-192.png" alt=""></div><span class="appname"></span></div>
+    <h1 id="title-blocked">Notifications are blocked</h1>
+    <p class="lead" id="lead-blocked"></p>
+    <h2 id="fix-head"></h2>
+    <p id="fix-how"></p>
+    <div class="grow"></div>
+    <button type="button" class="big" id="again">Try again</button>
+  </section>
+
+  <div style="padding: 0 24px 24px">
+    <details><summary>About this page</summary><p id="facts"></p><p id="version"></p></details>
+  </div>
+</div>
+<script src="config.js"></script>
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+  var PAGE_VERSION = 'v11'; // change with every upload of index.html; the worker has its own (WORKER_VERSION in sw.js)
+  var REG = null; // the service worker registration, kept ready so the click can ask straight away (Safari needs that)
+  var COLOUR_SHAPE = /^#[0-9A-Fa-f]{6}$/;
+  var DEFAULT_COLOUR = '#1565C0';
+  function cfg() { return typeof CONFIG === 'undefined' ? {} : CONFIG; }
+  function appName() { return String(cfg().name || '').trim() || 'this app'; }
+  function say(t) { $('status').textContent = t; }
+  // One screen at a time: before, iphone, on, blocked.
+  function show(name) {
+    ['before', 'iphone', 'on', 'blocked'].forEach(function (n) { $('scr-' + n).style.display = n === name ? 'block' : 'none'; });
+  }
+  function facts() {
+    var v = (navigator.userAgent.match(/(Version|Chrome|Firefox)\/[\d.]+/) || ['?'])[0];
+    return 'secure page: ' + window.isSecureContext + ', permission: ' + permission() +
+      ', push: ' + ('PushManager' in window) + ', home screen app: ' + isHomeScreenApp() + ', browser: ' + v;
+  }
+  function permission() { return window.Notification ? window.Notification.permission : 'no Notification'; }
+  function isIphone() { return /iPhone|iPad|iPod/.test(navigator.userAgent); }
+  function isHomeScreenApp() { return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches; }
+  // 'phone', 'iPad' or 'computer' - the words on the page follow the device.
+  function kind() {
+    var ua = navigator.userAgent;
+    if (/iPad/.test(ua)) return 'iPad';
+    return /iPhone|iPod|Android/.test(ua) ? 'phone' : 'computer';
+  }
+  // A plain name for this kind of device, shown on the owner's Devices tab (e.g. 'iPhone, Home Screen', 'Android, Chrome').
+  function deviceName() {
+    var ua = navigator.userAgent;
+    var browser = /SamsungBrowser\//.test(ua) ? 'Samsung Internet' : /Edg\//.test(ua) ? 'Edge' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '';
+    if (/iPhone|iPad|iPod/.test(ua)) return (/iPad/.test(ua) ? 'iPad' : 'iPhone') + (isHomeScreenApp() ? ', Home Screen' : ', Safari');
+    var os = /Android/.test(ua) ? 'Android' : /Macintosh/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : /Linux/.test(ua) ? 'Linux' : '';
+    return os && browser ? os + ', ' + browser : 'Other';
+  }
+  // An email the AppSheet link can add to the page address (?email=...). Passed on so Push To can use it.
+  function emailFromAddress() {
+    try { return new URLSearchParams(location.search).get('email') || ''; } catch (e) { return ''; }
+  }
+  function toBytes(b64url) {
+    var s = atob(b64url.replace(/-/g, '+').replace(/_/g, '/'));
+    return Uint8Array.from(s, function (c) { return c.charCodeAt(0); });
+  }
+  function newId() { // 32 letters and digits, made on this device
+    var b = new Uint8Array(16); crypto.getRandomValues(b);
+    return Array.from(b, function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+  }
+  function escape(t) {
+    return String(t === undefined || t === null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  async function readSetup() {
+    var r = await (await caches.open('push-setup')).match('/setup.json');
+    return r ? r.json() : null;
+  }
+  async function saveSetup(setup) {
+    await (await caches.open('push-setup')).put('/setup.json', new Response(JSON.stringify(setup)));
+  }
+  async function askScript(query) {
+    var res = await fetch(cfg().script + '?' + query, { cache: 'no-store' });
+    return res.json();
+  }
+  // The two encryption keys the browser hands over with its push address. The sheet locks the words with them,
+  // so version 1 cannot sign a device up without both. Gives null when either is missing.
+  function keysOf(sub) {
+    var keys = (sub && sub.toJSON && sub.toJSON().keys) || {};
+    return keys.p256dh && keys.auth ? keys : null;
+  }
+  // What the page sends the sheet at sign-up: this device's id, its push address, and the two keys.
+  function subscribeQuery(id, sub) {
+    var keys = keysOf(sub);
+    var email = emailFromAddress();
+    return 'action=subscribe&id=' + id + '&endpoint=' + encodeURIComponent(sub.endpoint) +
+      '&p256dh=' + encodeURIComponent(keys.p256dh) + '&auth=' + encodeURIComponent(keys.auth) +
+      '&device=' + encodeURIComponent(deviceName()) + (email ? '&email=' + encodeURIComponent(email) : '');
+  }
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    var now = new Date(), day = 86400000;
+    var time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(' ', '').toLowerCase();
+    if (d.toDateString() === now.toDateString()) return time;
+    if (d.toDateString() === new Date(now - day).toDateString()) return 'Yesterday';
+    return d.toLocaleDateString([], { day: 'numeric', month: 'short' });
+  }
+  // Recent: the last notifications this device got, newest first. Asked of the sheet, which keeps each device's last 10
+  // (18 Nov: on iPhone the worker's own log never reaches the page). If the sheet cannot be reached, the device's own log.
+  async function recentFromSheet() {
+    var setup = await readSetup();
+    if (!setup || !cfg().script) return null;
+    try {
+      var a = await askScript('action=recent&id=' + setup.id);
+      if (a && a.ok) { WAITING = a.waiting === true; paintOn(); }   // the sheet knows whether the owner has let this device in
+      return a && a.ok && a.recent ? a.recent.map(function (m) { return { shown: m.title, body: m.body, at: m.at }; }) : null;
+    } catch (e) { return null; }
+  }
+  async function showLog() {
+    var list = await recentFromSheet();
+    if (!list) {
+      var r = await (await caches.open('push-log')).match('/push-log.json');
+      list = r ? (await r.json()).slice().reverse() : [];
+    }
+    $('recent').innerHTML = list.length ? list.slice(0, 10).map(function (e) {
+      return '<div class="row"><div class="t"><b>' + escape(e.shown) + '</b>' + (e.body ? '<span class="m">' + escape(e.body) + '</span>' : '') +
+        '</div><span class="w">' + escape(when(e.at)) + '</span></div>';
+    }).join('') : '<div class="empty">Nothing yet. New notifications will show here too.</div>';
+  }
+  function showVersion(worker) {
+    var t = 'page ' + PAGE_VERSION + ', worker ' + (worker || 'not known');
+    if (worker && worker !== PAGE_VERSION) t += ' - an older worker is still running, close the app and open it again';
+    $('version').textContent = t;
+  }
+  function askVersion() { // a worker older than v4 never answers, so the line stays 'not known'
+    var w = REG && (REG.active || REG.waiting || REG.installing);
+    if (w) w.postMessage({ type: 'version?' });
+  }
+  // The owner's name and colour, from config.js (written by Set up).
+  function dress() {
+    var name = appName(), k = kind(), colour = COLOUR_SHAPE.test(String(cfg().colour || '')) ? cfg().colour : DEFAULT_COLOUR;
+    $('page').style.setProperty('--accent', colour);
+    var theme = $('theme'); if (theme && theme.setAttribute) theme.setAttribute('content', colour);
+    var home = $('home-title'); if (home && home.setAttribute && cfg().name) home.setAttribute('content', name);
+    if (cfg().name) document.title = name;
+    $('appname').textContent = name;
+    if (document.querySelectorAll) Array.prototype.forEach.call(document.querySelectorAll('.appname'), function (e) { e.textContent = name; });
+    $('title-before').textContent = 'Get notifications from ' + name + ' on this ' + k;
+    $('lead-before').textContent = 'When ' + name + ' sends something new, it pops up on this ' + k + (k === 'phone' ? ' like a text message.' : '.');
+    $('title-iphone').textContent = 'First, add ' + name + ' to your Home Screen';
+    $('step3').textContent = 'Open ' + name + ' from your Home Screen and turn on notifications there';
+    $('title-blocked').textContent = 'Notifications are blocked on this ' + k;
+    $('lead-blocked').textContent = 'This ' + k + ' said no to notifications from ' + name + '. Only its settings can change that.';
+    var ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(ua)) { $('fix-head').textContent = 'iPhone'; $('fix-how').textContent = 'Settings, then Notifications, then ' + name + '. Turn on Allow Notifications.'; }
+    else if (/Android/.test(ua)) { $('fix-head').textContent = 'Android'; $('fix-how').textContent = 'Press and hold the ' + name + ' icon, tap App info, then Notifications, and turn them on.'; }
+    else { $('fix-head').textContent = 'On a computer'; $('fix-how').textContent = 'Click the icon at the left of the address bar, find Notifications, and choose Allow. Then tap Try again.'; }
+  }
+  // v10 (cold test 18 Nov: the page said ON while the device was still waiting for the owner): the On screen says which
+  // it is. The sheet's answers say when a device is waiting - the sign-up answer, and the Recent answer on every open.
+  var NAME = '', WAITING = false;
+  function paintOn() {
+    if (!NAME) return;
+    $('title-on').textContent = WAITING ? 'Waiting to be let in' : 'Notifications are on';
+    $('tick-on').style.display = WAITING ? 'none' : '';   // v11: a tick beside "waiting" reads like it is already on
+    $('devname').textContent = 'This ' + kind() + "'s name is " + NAME + '.' + (WAITING ? ' Notifications start once the owner of ' + appName() + ' lets it in.' : '');
+  }
+  function signedUpAs(name, waiting) {
+    NAME = name; WAITING = waiting === true;
+    paintOn();
+    show('on');
+    showLog().catch(function () {});
+  }
+  async function start() {
+    showVersion(null);
+    dress();
+    show('before');
+    $('facts').textContent = facts();
+    if (!cfg().script || String(cfg().script).indexOf('https://') !== 0) {
+      say('This page has not been set up yet. Ask whoever sent you the link.');
+      $('on').style.display = 'none'; $('note-before').style.display = 'none';
+      return;
+    }
+    if (isIphone() && !isHomeScreenApp()) { show('iphone'); return; }
+    if (permission() === 'denied') { show('blocked'); return; }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      say('This browser cannot get notifications from a page. Try Chrome, Edge, Firefox or Safari.');
+      $('on').style.display = 'none';
+      return;
+    }
+    REG = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    askVersion();
+    var sub = await REG.pushManager.getSubscription();
+    var setup = await readSetup();
+    if (sub && setup) signedUpAs(setup.id.slice(0, 4).toUpperCase());
+    // Already signed up: quietly send the sign-up again, so the sheet has this device's current address and its two keys.
+    if (sub && setup && keysOf(sub)) askScript(subscribeQuery(setup.id, sub)).catch(function () {});
+  }
+  // The browser must be asked DIRECTLY from the tap, with nothing in between (Safari shows no Allow box otherwise).
+  $('on').onclick = function () {
+    if (!REG) { say('Not ready yet - wait a second and tap again.'); return; }
+    say('Look for a box asking to allow notifications.');
+    var timer = setTimeout(function () { say('No answer after 15 seconds. Close this page, open it again and tap Turn on.'); }, 15000);
+    REG.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toBytes(cfg().publicKey) }).then(async function (sub) {
+      clearTimeout(timer);
+      if (!keysOf(sub)) { say('This browser did not hand over its encryption keys, so it cannot get notifications. Close the app, open it again and tap Turn on.'); return; }
+      say('Allowed. Signing up...');
+      var setup = (await readSetup()) || { script: cfg().script, id: newId() };
+      setup.script = cfg().script;
+      await saveSetup(setup);
+      var answer = await askScript(subscribeQuery(setup.id, sub));
+      if (answer && answer.ok) { say(''); signedUpAs(answer.name, answer.waiting); }
+      else say('Allowed here, but the sign-up was refused: ' + (answer && answer.error));
+      $('facts').textContent = facts();
+    }).catch(function (e) {
+      clearTimeout(timer);
+      $('facts').textContent = facts();
+      if (permission() === 'denied') { say(''); show('blocked'); return; }
+      say('That did not work (' + e.name + '). Tap Turn on to try again.');
+    });
+  };
+  $('off').onclick = async function () {
+    try {
+      var setup = await readSetup();
+      var sub = REG ? await REG.pushManager.getSubscription() : null;
+      if (sub) await sub.unsubscribe();
+      if (setup) await askScript('action=unsubscribe&id=' + setup.id);
+      show('before');
+      say('Notifications are off on this ' + kind() + '.');
+    } catch (e) { say('Problem turning off: ' + e.name + ': ' + e.message); }
+  };
+  $('again').onclick = function () { location.reload(); };
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'version') showVersion(e.data.worker); else showLog();
+  });
+  // Re-read Recent whenever the page comes back to the front (an app left open showed old pushes, 17 Nov).
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') showLog().catch(function () {}); });
+  window.addEventListener('pageshow', function () { showLog().catch(function () {}); });
+  start().catch(function (e) { say('Problem starting: ' + e.name + ': ' + e.message); });
+</script>
+</body>
+</html>
