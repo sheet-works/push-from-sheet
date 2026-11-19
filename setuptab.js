@@ -187,7 +187,7 @@ var SETUPTAB = (function (SETUP, STEPS) {
     else if (facts.apiSwitch === false) put(sw, 3, '!  Off', 'amber');
 
     var head = 5;   // row 6: Firebase project, Apps Script API, Your settings, Set up
-    if (nameMissing) put(head, 2, '!  Needs your project name', 'amber');
+    if (nameMissing) put(head, 2, '!  Needs your project address', 'amber');
     else if (steps[STEP_NAMES[0]] && steps[STEP_NAMES[0]].ok) put(head, 2, '✓  Done', 'green');
     else put(head, 2, NOT_YET, 'grey');
     if (facts.apiSwitch === true) put(head, 3, '✓  On', 'green');

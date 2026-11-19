@@ -207,7 +207,7 @@ const tick = (b, row, col) => b.tones.find(t => t.row === row && t.col === col);
 
 test('nothing done yet: every tick grey Not yet, settings amber with how many are missing', () => {
   const b = build(BOOK, [['', 'Tab with your rows', 'Jobs']]);
-  assert.deepEqual(b.rows[5].slice(1), ['!  Needs your project name', '–  Not checked', '!  3 to fill in', '–  Not yet']);
+  assert.deepEqual(b.rows[5].slice(1), ['!  Needs your project address', '–  Not checked', '!  3 to fill in', '–  Not yet']);
   assert.deepEqual([2, 3, 4, 5].map(c => tick(b, 6, c).tone), ['amber', 'grey', 'amber', 'grey']);
   STEPS.forEach(s => { assert.equal(valueOf(b, s), '–  Not yet'); assert.equal(tick(b, rowOf(b, s), 3).tone, 'grey', s); });
 });
@@ -215,7 +215,7 @@ test('nothing done yet: every tick grey Not yet, settings amber with how many ar
 test('one thing missing says 1 to fill in; the Firebase tick asks for the name when that is what is missing', () => {
   const b = build(BOOK, filled(build(BOOK, [['', 'Tab with your rows', 'Jobs']])).map(r => r[1] === 'Firebase project address' ? ['', r[1], '', r[3], r[4]] : r));
   assert.equal(b.rows[5][3], '!  1 to fill in');
-  assert.equal(b.rows[5][1], '!  Needs your project name');
+  assert.equal(b.rows[5][1], '!  Needs your project address');
   assert.equal(tick(b, 6, 2).tone, 'amber');
 });
 

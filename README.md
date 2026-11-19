@@ -47,7 +47,7 @@ Menu: **Push from sheet › Set up**
 
 Google asks you to allow the script. *"Google hasn't verified this app"* is normal: it's your own copy, and the developer it names is you. Click **Advanced › Go to Push from sheet**, tick **Select all**, then **Continue**. Run Set up again if it stops after the permission screen.
 
-Set up takes about half a minute. It ticks each step as it goes and shows **LIVE** when it's done. Then a box opens with your sign-up page's link and QR code.
+Set up takes under a minute. It ticks each step as it goes and shows **LIVE** when it's done. Then a box opens with your sign-up page's link and QR code.
 
 ### 5. Sign phones up
 
@@ -66,7 +66,7 @@ Open the **Devices** tab. New devices wait for your tick. Tick **Let in** and th
 
 ### 7. Add a row
 
-Add a row to your tab. A few seconds later it pops up on every device you let in. The **Notified** column says when it went, and to how many devices.
+Add a row to your tab. About half a minute later it pops up on every device you let in: the wait gives you time to finish typing the row. With **Wait before sending** set to Off (best for AppSheet), it goes within a few seconds. The **Notified** column says when it went, and to how many devices.
 
 To test without adding a row: **Push from sheet › Send me a test**.
 
@@ -94,7 +94,7 @@ All on the Setup tab, mostly dropdowns:
 ## Good to know
 
 - **Who can send:** anyone who can add a row to your tab can send a notification. Only let people you trust add rows.
-- **Google's daily allowance:** Apps Script has a daily allowance of run time, shared by all your scripts. The backup check uses about 11 minutes a day at the 10-minute setting. Free accounts get 90 minutes a day.
+- **Google's daily allowance:** Apps Script has a daily allowance of run time, shared by all your scripts. The backup check uses about 11 minutes a day at the 10-minute setting, and each row sent with a 30-second wait uses about half a minute (a few seconds with the wait Off). Free accounts get 90 minutes a day.
 - **How the words travel:** each notification is locked (encrypted) for the one device it's going to, then handed to that device's own push service (Apple's, Google's, Mozilla's or Microsoft's). They pass it on without being able to read it.
 - **Where things are kept:** the device list is in your sheet. The keys are in your sheet's script. The sign-up page sits on your Firebase project.
 - **Updates:** Push from sheet › Check for update tells you if there's a newer version and where to get it. Nothing updates by itself.
