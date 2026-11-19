@@ -124,16 +124,19 @@ Tests: `node --test test*.js`. They were written before the code, and each piece
 
 ## Credit
 
-This is not the first time Web Push has been signed inside Apps Script. Others did it before us, in their own app projects:
+Sending Web Push from Apps Script isn't new. Plenty of people have built it into their own apps. A few examples:
 
 - [andres1-dev/two](https://github.com/andres1-dev/two) (`P9/NotificacionesGAS.txt`)
 - [77sevenbox-git-it/Sevenboxapp](https://github.com/77sevenbox-git-it/Sevenboxapp) (`oyuncaq-magaza/apps-script/Code.gs`)
 - [sqaz2/mftnb](https://github.com/sqaz2/mftnb) (`backend/owner-notifications.gs`)
 - [maxwellbw/household-hq](https://github.com/maxwellbw/household-hq) (`backend/WebPush.js`, using SJCL)
 - [desvandi/PLTSMonitoring_Firmware-Backend](https://github.com/desvandi/PLTSMonitoring_Firmware-Backend) (`push-alarm/gas/WebPushCore.gs`)
+- [Tashtimirov/IZIDAY](https://github.com/Tashtimirov/IZIDAY) (`server/Friends.gs`)
 - [NyckolasBotero/zoe-app](https://github.com/NyckolasBotero/zoe-app) (its first design; it later moved sending to a Cloudflare Worker)
 
-What Push from sheet adds is the packaging: a sheet anyone can copy and set up, for AppSheet apps and plain sheets alike.
+There are more: [search GitHub for `UrlFetchApp vapid`](https://github.com/search?q=UrlFetchApp+vapid&type=code). For AppSheet, Mathieu_Matek's Chrome extension (building on Rifad's) brings bot alerts to desktop Chrome.
+
+What Push from sheet adds is the packaging: a sheet anyone can copy and set up, for AppSheet apps and plain sheets alike. None of the code above was copied; this was written from the published standards (RFC 8030, 8291, 8292).
 
 ## Licence
 
