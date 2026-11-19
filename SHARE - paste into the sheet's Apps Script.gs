@@ -1675,10 +1675,12 @@ var SETUPTAB = (function (SETUP, STEPS) {
 
   // A copy of a sheet that was set up: keep the owner's picks, but not the Firebase project (it belongs to whoever set
   // up the original). Drawn with no facts, it shows as not set up: no LIVE, no link, no QR (18 Nov).
-  function forCopy(grid) {
+  // fromMaster: the copy was made from the shared master, which never holds a project, so a project in the box was typed
+  // by the new owner and is kept (19 Nov: an address pasted straight after copying was wiped).
+  function forCopy(grid, fromMaster) {
     return (grid || []).map(function (r) {
       var row = (r || []).slice();
-      if ([SETUP.PROJECT_LABEL].concat(SETUP.OLD_PROJECT_LABELS).indexOf(text(row[1])) >= 0) row[2] = '';
+      if (!fromMaster && [SETUP.PROJECT_LABEL].concat(SETUP.OLD_PROJECT_LABELS).indexOf(text(row[1])) >= 0) row[2] = '';
       return row;
     });
   }
@@ -2631,7 +2633,7 @@ function pfsCopyCheck_(book) {
     headers[name] = last ? s.getRange(1, 1, 1, last).getDisplayValues()[0] : [];
     return name;
   });
-  var built = SETUPTAB.build({ name: book.getName(), tabs: tabs, headers: headers, owner: pfsOwner_(book) }, SETUPTAB.forCopy(current), {});
+  var built = SETUPTAB.build({ name: book.getName(), tabs: tabs, headers: headers, owner: pfsOwner_(book) }, SETUPTAB.forCopy(current, MENU.isMaster(was)), {});
   var s = SETUP.read(built.rows).settings;
   setupDraw_(tab, built, s.colour);
   pfsPlaceQr_(tab, built, null);
@@ -2789,4 +2791,4 @@ var PFS_ENV = {
 };
 
 // Build stamp (made by build.py from everything above).
-var PFS_BUILD = '2093959992';
+var PFS_BUILD = '539672846';

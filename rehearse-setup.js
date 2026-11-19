@@ -249,3 +249,8 @@ sheets.Setup.grid.find(r => r[1] === 'Firebase project address')[2] = 'https://c
 G.afterRead = null; G.onFetch = null;
 sheets.Setup.grid.find(r => r[1] === 'Making an AppSheet app?')[2] = 'Yes'; setWait('30 seconds'); logs.length = 0;
 safe('pfsSetUp'); console.log('wait after Set up:', JSON.stringify(val('Wait before sending')), '| said changed:', /You changed/.test(logs.join(' ')));
+console.log('===== 23. a copy of the MASTER: an address pasted before its first open is kept (19 Nov: it was wiped)');
+sheets.Setup.meta = [{ k: 'pfs-book', v: '1cEkCkMDHR85XqrXljxhCz8w_LEZTNxWlts5GbpybLyA' }];   // what a fresh copy of the master carries
+G.bookId = 'BOOK-MASTER-COPY'; G.scriptId = 'SCRIPT-MASTER-COPY';
+sheets.Setup.grid.find(r => r[1] === 'Firebase project address')[2] = 'https://console.firebase.google.com/project/pasted-fast-9z/overview';
+safe('_openCopy'); console.log('address after the first open:', JSON.stringify(val('Firebase project address')));

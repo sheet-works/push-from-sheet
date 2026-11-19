@@ -203,10 +203,12 @@ var SETUPTAB = (function (SETUP, STEPS) {
 
   // A copy of a sheet that was set up: keep the owner's picks, but not the Firebase project (it belongs to whoever set
   // up the original). Drawn with no facts, it shows as not set up: no LIVE, no link, no QR (18 Nov).
-  function forCopy(grid) {
+  // fromMaster: the copy was made from the shared master, which never holds a project, so a project in the box was typed
+  // by the new owner and is kept (19 Nov: an address pasted straight after copying was wiped).
+  function forCopy(grid, fromMaster) {
     return (grid || []).map(function (r) {
       var row = (r || []).slice();
-      if ([SETUP.PROJECT_LABEL].concat(SETUP.OLD_PROJECT_LABELS).indexOf(text(row[1])) >= 0) row[2] = '';
+      if (!fromMaster && [SETUP.PROJECT_LABEL].concat(SETUP.OLD_PROJECT_LABELS).indexOf(text(row[1])) >= 0) row[2] = '';
       return row;
     });
   }

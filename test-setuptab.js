@@ -659,3 +659,14 @@ test('waitFollows: a wait the owner picked (1 minute) is left; No leaves 30 seco
   assert.equal(SETUPTAB.waitFollows([['', SETUP.APPSHEET_LABEL, 'No'], ['', SETUP.WAIT_LABEL, 'Off']])[1][2], 'Off', 'an Off the owner chose with No stays Off');
   assert.deepEqual(SETUPTAB.waitFollows([]), []);
 });
+
+// 19 Nov (fresh copy of the public master): the Firebase address pasted straight after the copy opened was wiped by
+// the copy's first-open redraw. The master never holds a project, so in a copy of the master whatever is in the box was
+// typed by the new owner and stays. A copy of somebody's own set-up sheet still loses the old project.
+test('forCopy from the master keeps a project the new owner already typed; from a set-up sheet it is still cleared', () => {
+  const grid = [['', 'Firebase project address', LINK], ['', 'App name', 'Smith']];
+  assert.equal(SETUPTAB.forCopy(grid, true)[0][2], LINK, 'copy of the master: kept');
+  assert.equal(SETUPTAB.forCopy(grid, false)[0][2], '', 'copy of a set-up sheet: cleared');
+  assert.equal(SETUPTAB.forCopy(grid)[0][2], '', 'not said: cleared (the safe way)');
+  assert.equal(SETUPTAB.forCopy(grid, true)[1][2], 'Smith');
+});

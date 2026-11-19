@@ -24,6 +24,7 @@ B = [
  ('share box not opened at the end', "  if (STEPS.finished(facts)) pfsShowShare_(", "  if (false) pfsShowShare_(", 'share box after Set up'),
  ('Set up ignores AppSheet Yes with Wait at 30 seconds', "  current = SETUPTAB.waitFollows(current);", "", 'wait after Set up'),
  ('after the steps the raw tab is read, so Off looks typed', "var now2 = SETUPTAB.waitFollows(tab.getDataRange().getDisplayValues())", "var now2 = tab.getDataRange().getDisplayValues()", 'wait after Set up'),
+ ('copy of the master wipes a pasted address', "SETUPTAB.forCopy(current, MENU.isMaster(was))", "SETUPTAB.forCopy(current)", 'address after the first open'),
  ('share box without All done', "MENU.shareHtml(page, png, s.appName || MENU.TITLE, s.colour, lead)", "MENU.shareHtml(page, png, s.appName || MENU.TITLE, s.colour)", 'All done on top'),
 ]
 def run(text):

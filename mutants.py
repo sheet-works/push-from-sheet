@@ -565,6 +565,8 @@ M = [
  ('setuptab.js', 'waitFollows does nothing', "      if (change) out[change.row - 1][change.col - 1] = change.value;", ""),
  ('setuptab.js', 'waitFollows changes the rows given', "var out = rows.map(function (r) { return (r || []).slice(); }), i;", "var out = rows, i;"),
  ('setuptab.js', 'waitFollows follows No too', ".toLowerCase() !== 'yes') continue;", ".toLowerCase() === 'maybe') continue;"),
+ ('setuptab.js', 'forCopy ignores fromMaster', "if (!fromMaster && [SETUP.PROJECT_LABEL]", "if ([SETUP.PROJECT_LABEL]"),
+ ('setuptab.js', 'forCopy keeps every project', "if (!fromMaster && [SETUP.PROJECT_LABEL]", "if (false && [SETUP.PROJECT_LABEL]"),
  ('setup.js', 'blank message parts kept', "MESSAGE_LABELS.map(get).join(',').split(',').map(text).filter(function (m) { return m !== ''; });", "MESSAGE_LABELS.map(get).join(',').split(',').map(text);"),
 ]
 # Optional: python3 mutants.py FROM TO runs only that slice (the Mac session stops long runs).

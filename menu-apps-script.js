@@ -72,7 +72,7 @@ function pfsCopyCheck_(book) {
     headers[name] = last ? s.getRange(1, 1, 1, last).getDisplayValues()[0] : [];
     return name;
   });
-  var built = SETUPTAB.build({ name: book.getName(), tabs: tabs, headers: headers, owner: pfsOwner_(book) }, SETUPTAB.forCopy(current), {});
+  var built = SETUPTAB.build({ name: book.getName(), tabs: tabs, headers: headers, owner: pfsOwner_(book) }, SETUPTAB.forCopy(current, MENU.isMaster(was)), {});
   var s = SETUP.read(built.rows).settings;
   setupDraw_(tab, built, s.colour);
   pfsPlaceQr_(tab, built, null);
